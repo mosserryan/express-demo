@@ -1,7 +1,9 @@
 const express = require("express");
+var cors = require("cors");
 
 const server = express();
 server.use(express.json());
+server.use(cors());
 
 // prcess.env.PORT allows us to use non local deployments. Or use our local port 3000 if using locally on our PC
 const PORT = process.env.PORT || 3000;
