@@ -1,5 +1,7 @@
+require("dotenv").config();
 const express = require("express");
 var cors = require("cors");
+const axios = require("axios");
 
 const server = express();
 server.use(express.json());
@@ -15,7 +17,7 @@ server.listen(PORT, () => {
 });
 
 const destinations = [];
-server.post("/destinations", (req, res) => {
+server.post("/destinations", async (req, res) => {
   console.log("POST /destinations hits");
   // Request Body coming in fromt the front end.
   console.log(req.body);
@@ -24,7 +26,7 @@ server.post("/destinations", (req, res) => {
   /* const destination = req.body.destination; */
 
   // OR destruction obj;
-  const { destination, location, photo, description } = req.body;
+  const { destination, location, description } = req.body;
 
   if (!destination || !location || destination.length === 0 || location === 0) {
     return res
@@ -32,18 +34,19 @@ server.post("/destinations", (req, res) => {
       .send({ error: "Destination AND location are BOTH required!" });
   }
 
-  let newDestPhoto;
-  if (photo && photo.length !== 0) {
-    newDestPhoto = photo;
-  } else {
-    newDestPhoto = "Melvin";
-  }
+  const UnsplashApiUrl = `https://api.unsplash.com/photos/random?query=${location} ${destination}&client_id=${process.env.UNSPLASH_API_KEY}`;
+
+  const { data } = await axios.get(UnsplashApiUrl);
+
+  const photos = data.urls.regular;
+
+  console.log(photos);
 
   // Create the new object to put in my DB
   const newDest = {
     destination,
     location,
-    newDestPhoto,
+    photo: photos,
     description:
       description && description.length !== 0 ? description : "Another Melvin",
   };
